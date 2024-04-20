@@ -7,3 +7,7 @@ void print_msg (const char* my_msg, char* yytext) {
         std::cout << my_msg << std::endl;
     }
 }
+
+void print_token (FILE* out, int type) {
+    fwrite (&type, sizeof (int), 1, out);
+}

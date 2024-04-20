@@ -1,5 +1,7 @@
 all: flex run
 
+SRC = src
+
 flex: flex.l lex_funct.cpp
 	flex --header-file=lex_lib.hpp flex.l lex_funct.cpp
 
