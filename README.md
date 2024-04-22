@@ -23,4 +23,6 @@ NUM ::= [0-9]*
 
 ## Часть II. Конечный автомат ##
 
+shift/reduce анализатор был реализован с помощью конечного автомата, изображенного на следующей картинке.
+
 ![Image alt](https://github.com/BoredLudleth/Calculator-Parsing/raw/main/shift-reduce/state_machine.png)
