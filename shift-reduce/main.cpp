@@ -25,7 +25,27 @@ int main () {
     }
 
     SyntaxAnalyzer<LR0> shift_reduce (token);
-    shift_reduce.syntaxAnalysis();
+    int action = 0;
+    shift_reduce.output ();
+    do {
+        std::cout << "\t\t\tstate: " << shift_reduce.state << std::endl;
+        action = shift_reduce.stateMachine();
+        shift_reduce.output ();
+        switch (action) {
+            case REDUCE:
+                std::cout << " reduce" << std::endl;
+                break;
+            case SHIFT:
+                std::cout << " shift" << std::endl;
+                break;
+            case ERROR:
+                std::cout << " error" << std::endl;
+                break;
+            case ACCEPT:
+                std::cout << " accept" << std::endl;
+                break;
+        }
+    } while  (action == SHIFT || action == REDUCE);
 
     return 0;
 }

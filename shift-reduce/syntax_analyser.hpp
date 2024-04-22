@@ -17,7 +17,15 @@ enum Tokens {
     DIV,
     MUL,
     ADD,
-    SUB
+    SUB, 
+    ERROR_TOK
+};
+
+enum Action {
+    SHIFT,
+    REDUCE,
+    ACCEPT,
+    ERROR
 };
 
 enum Grammar {
@@ -46,126 +54,306 @@ class SyntaxAnalyzer<LR0> {
     public:
 
     SyntaxAnalyzer (std::stack<int> tokens) : input (tokens) {};
+        int state = 0;
 
-    bool shift () {
-        if (hasTokens()) {
-            return FAILED;
-        }
-
+    int stateMachine () {
+        switch (state) {
+            case 0:
+                return I0();
+            case 1:
+                return I1();
+            case 2:
+                return I2();
+            case 3:
+                return I3();
+            case 4:
+                return I4();
+            case 5:
+                return I5();
+            case 6:
+                return I6();
+            case 7:
+                return I7();
+            case 8:
+                return I8();
+            case 9:
+                return I9();
+            case 10:
+                return I10();
+            case 11:
+                return I11();
+            default:
+                std::cout << "ERROR::Undefiend state of state machine" << std::endl;
+                return ERROR;
+        };
+    }
+    int shift () {
         int temp = input.top();
         input.pop();
         stack.push (temp);
 
-        return SUCCESS;
+        return temp;
     }
 
-    int reduce () {
-        if (stackEmpty()) {
-            return FAILED;
-        }
-
-        switch (stack.top()) {
-            case NUM:
-            case VAR:
-                numOrVarToId ();
-                break;
-            case ID:
-                return idToP ();
-                break;
-            case CLOSE_SCOPE:
-                return scopeExprToP ();
-                break;
-            case P:
-                return PToT ();
+    int I0 () {
+        int token = shift();
+        
+        switch (token) {
+            case E:
+                state = 1;
                 break;
             case T:
-                return TToE ();
+                state = 2;
+                break;
+            case P:
+                state = 3;
+                break;
+            case OPEN_SCOPE:
+                state = 4;
+                break;
+            case VAR:
+            case NUM:
+                state = 5;
                 break;
             default:
-                return FAILED;
+                return ERROR;
+
         };
 
-        return SUCCESS;
+        return SHIFT;
     }
 
-    int numOrVarToId () {
-        stack.pop ();
-        stack.push (ID);
-
-        return SUCCESS;
-    }
-
-    int idToP () {
-        stack.pop ();
-        stack.push (P);
-
-        return SUCCESS;
-    }
-
-    int scopeExprToP () {
-        stack.pop ();
-
-        if (stack.top() == E) {
+    int I1 () {
+        if (hasTokens()) {
             stack.pop();
-            if (stack.top() == OPEN_SCOPE) {
+            stack.push(E);
+            return ACCEPT;
+        }
+
+        int token = shift();
+
+        switch (token) {
+            case ADD:
+            case SUB:
+                state = 6;
+                break;
+            default:
+                return ERROR;
+        }
+
+        return SHIFT;
+    }
+
+    int I2 () {
+        if (hasTokens()) {
+            state = 0;
+            stack.pop();
+            stack.push(E);
+            return REDUCE;
+        }
+
+        int token = shift();
+
+        switch (token) {
+            case MUL:
+            case DIV:
+                state = 7;
+                return I7();
+            case ADD:   //??????
+            case SUB:
+                state = 1;
+                input.push(stack.top());
                 stack.pop();
-                stack.push (P);
-
-                return SUCCESS;
-            } else {
-                stack.push(E);
-                stack.push(CLOSE_SCOPE);
-                return FAILED;
-            }
-        } else {
-            stack.push(CLOSE_SCOPE);
-            return FAILED;
-        }
-    }
-
-    int PToT () {
-        stack.pop();
-        
-        if (!stackEmpty() && (stack.top() == DIV || stack.top() == MUL)) {
-            int sign = stack.top();
-            stack.pop();
-
-            if (stack.top() == T || stack.top() == P) {
-                stack.pop ();
-                stack.push (T);
-                return SUCCESS;
-            } else {
-                stack.push (sign);
-                stack.push(T);
-
-                return FAILED;
-            }
-        } else {
-            stack.push (T);
-            return SUCCESS;
-        }
-    }
-
-    int TToE () {
-        stack.pop();
-
-        if (!stackEmpty() && (stack.top() == SUB || stack.top() == ADD)) {
-            int sign = stack.top();
-            stack.pop();
-
-            if (stack.top() == T || stack.top() == E) {
                 stack.pop();
-                stack.push (E);
-                return SUCCESS;
-            } else {
-                stack.push (sign);
-                stack.push(T);
-                return FAILED;
-            }
-        } else {
-            stack.push (E);
-            return SUCCESS;
+                if (stackEmpty() || stack.top() == OPEN_SCOPE) {
+                    stack.push(E);
+                } else {
+                    stack.push(T);
+                }
+                return REDUCE;
+            default:
+                return ERROR;
         }
+    }
+
+    int I3 () {
+        if (hasTokens()) {
+            state = 1;
+            return REDUCE;
+        }
+        state = 9;
+        stack.pop();
+        stack.push(T);
+        return I9();
+    }
+
+    int I4 () {
+        int token = shift();
+
+
+        switch (token) {
+            case E:
+                state = 8;
+                break;
+            case OPEN_SCOPE:
+                state = 4;
+                break;
+            case T:
+                state = 2;
+                break;
+            case P:
+                state = 3;
+                break;
+            case NUM:
+            case VAR: 
+                state = 5;
+                break;
+            default:
+                printf ("error\n");
+                return ERROR;
+        };
+
+        return SHIFT;
+    }
+
+    int I5 () {
+        state = 3;
+        stack.pop();
+        if (stackEmpty()) {
+            state = 3;
+            stack.push(P);
+
+            return REDUCE;
+        }
+        switch (stack.top()) {
+            case DIV:
+            case MUL:
+                state = 10;
+                break;
+            default:
+                state = 3;
+                break;
+        }
+        stack.push(P);
+
+        return REDUCE;
+    }
+
+    int I6 () {
+        int token = shift ();
+
+        switch (token) {
+            case T:
+                state = 9;
+                break;
+            case P:
+                state = 3;
+                break;
+            case OPEN_SCOPE:
+                state = 4;
+                break;
+            case NUM:
+            case VAR:
+                state = 5;
+                break;
+            default:
+                return ERROR;
+
+        };
+
+        return SHIFT;
+    }
+
+    int I7 () {
+        int token = shift ();
+
+        switch (token) {
+            case P:
+                state = 10;
+                break;
+            case OPEN_SCOPE:
+                state = 4;
+                break;
+            case NUM:
+            case VAR:
+                state = 5;
+                break;
+            default:
+                return ERROR;
+
+        };
+
+        return REDUCE;
+    }
+
+    int I8 () {
+        int token = shift ();
+
+        switch (token) {
+            case CLOSE_SCOPE:
+                state = 11;
+                break;
+            case ADD:
+            case SUB:
+                state = 6;
+                break;
+            default:
+                return ERROR;
+
+        };
+
+        return SHIFT;
+    }
+
+    int I9 () {
+        int token = shift ();
+
+        switch (token) {
+            case MUL:
+            case DIV:
+                state = 7;
+                break;
+            default:
+                input.push(stack.top());
+                stack.pop();
+                input.push(stack.top());
+                stack.pop();
+                if (stack.top() == ADD || stack.top() == SUB) {
+                    state = 8;
+                    input.pop();
+                    stack.pop();
+                    return REDUCE;
+                } else {
+                    state = 2;
+                    stack.push(input.top());
+                    input.pop();
+                    return SHIFT;
+                }
+        };
+
+        return SHIFT;
+    }
+
+    int I10 () {
+        state = 3;
+        stack.pop();
+        stack.pop();
+
+        return REDUCE;
+    }
+
+    int I11 () {
+        stack.pop();
+        stack.pop();
+        stack.pop();
+        if (stack.top() == MUL || stack.top() == DIV) {
+            state = 10;
+        } else {
+            state = 3;
+        }
+        stack.push(P);
+
+        return REDUCE;
     }
 
     void dumpBackOrderStack (std::stack<int> s) const {
@@ -225,37 +413,5 @@ class SyntaxAnalyzer<LR0> {
         dumpBackOrderStack (stack);
         std::cout << " ||";
         dumpStack (input);
-    }
-
-    int syntaxAnalysis () {
-        output();
-        std::cout << std::endl;
-
-        while (!hasTokens()) {
-            if (reduce ()) {
-                output();
-                std::cout << " reduce" << std::endl;
-                continue;
-            } else {
-                shift ();
-                output();
-                std::cout << " shift" << std::endl;
-                continue;
-            }
-        }
-
-        while (reduce()) {
-            output ();
-            std::cout << " reduce" << std::endl;
-        };
-
-        output();
-        
-        if (stack.size() == 1 && stack.top () == E) {
-            std::cout << std::endl << "Success! All right! Good!" << std::endl;
-            return SUCCESS;
-        }
-
-        return FAILED;
     }
 };
