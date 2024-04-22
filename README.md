@@ -7,18 +7,20 @@
 
 ## Компиляция ##
 ```
-В разработке
+run.sh - для запуска проекта
 ```
 
 ## Часть I. LR(0) грамматика нашего языка ##
 ```
 G   ::= E<EOF>
-E   ::= T{[+-]T}*
-T   ::= P{[*/]P}*
+E   ::= E{[+-]T}*
+T   ::= T{[*/]P}*
 P   ::= (E)|ID
 ID  ::= VAR|NUM
 VAR ::= [xyz]
 NUM ::= [0-9]*
 ```
 
-## Часть II. В разработке ##
+## Часть II. Конечный автомат ##
+
+![Image alt](https://github.com/BoredLudleth/Calculator-Parsing/raw/main/shift-reduce/state_machine.png)
