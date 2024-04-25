@@ -184,12 +184,11 @@ class SyntaxAnalyzer<LR0> {
         state = 9;
         stack.pop();
         stack.push(T);
-        return I9();
+        return REDUCE;
     }
 
     int I4 () {
         int token = shift();
-
 
         switch (token) {
             case E:
@@ -346,6 +345,13 @@ class SyntaxAnalyzer<LR0> {
         stack.pop();
         stack.pop();
         stack.pop();
+
+        if (stackEmpty()) {
+            stack.push(P);
+            state = 3;
+            return REDUCE;
+        }
+        
         if (stack.top() == MUL || stack.top() == DIV) {
             state = 10;
         } else {

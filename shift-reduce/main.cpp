@@ -11,7 +11,7 @@ int lenFile(FILE *text)
 }
 
 int main () {
-    FILE* in = fopen ("out.bin", "rb");
+    FILE* in = fopen ("build/out.bin", "rb");
     int len_in = lenFile (in) / sizeof (int);
     int token_array[len_in];
     fread (token_array, sizeof(int), len_in, in);
