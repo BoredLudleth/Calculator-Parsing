@@ -8,7 +8,7 @@ int main (int argc, char** argv) {
         yyin = stdin;
     }
 
-    yyout = fopen ("build/out.bin", "w+");;
+    yyout = fopen ("build/out.bin", "w+");
 
     yylex();
 

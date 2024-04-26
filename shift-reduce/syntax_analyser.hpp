@@ -21,6 +21,13 @@ enum Tokens {
     ERROR_TOK
 };
 
+enum States {
+    i0,     i1,     i2,
+    i3,     i4,     i5,
+    i6,     i7,     i8,
+    i9,     i10,    i11
+};
+
 enum Action {
     SHIFT,
     REDUCE,
@@ -54,33 +61,33 @@ class SyntaxAnalyzer<LR0> {
     public:
 
     SyntaxAnalyzer (std::stack<int> tokens) : input (tokens) {};
-        int state = 0;
+        int state = i0;
 
     int stateMachine () {
         switch (state) {
-            case 0:
+            case i0:
                 return I0();
-            case 1:
+            case i1:
                 return I1();
-            case 2:
+            case i2:
                 return I2();
-            case 3:
+            case i3:
                 return I3();
-            case 4:
+            case i4:
                 return I4();
-            case 5:
+            case i5:
                 return I5();
-            case 6:
+            case i6:
                 return I6();
-            case 7:
+            case i7:
                 return I7();
-            case 8:
+            case i8:
                 return I8();
-            case 9:
+            case i9:
                 return I9();
-            case 10:
+            case i10:
                 return I10();
-            case 11:
+            case i11:
                 return I11();
             default:
                 std::cout << "ERROR::Undefiend state of state machine" << std::endl;
@@ -100,20 +107,20 @@ class SyntaxAnalyzer<LR0> {
         
         switch (token) {
             case E:
-                state = 1;
+                state = i1;
                 break;
             case T:
-                state = 2;
+                state = i2;
                 break;
             case P:
-                state = 3;
+                state = i3;
                 break;
             case OPEN_SCOPE:
-                state = 4;
+                state = i4;
                 break;
             case VAR:
             case NUM:
-                state = 5;
+                state = i5;
                 break;
             default:
                 return ERROR;
@@ -127,7 +134,11 @@ class SyntaxAnalyzer<LR0> {
         if (hasTokens()) {
             stack.pop();
             stack.push(E);
-            return ACCEPT;
+            if (stack.size() == 1) {
+                return ACCEPT;
+            }
+
+            return ERROR;
         }
 
         int token = shift();
@@ -135,7 +146,7 @@ class SyntaxAnalyzer<LR0> {
         switch (token) {
             case ADD:
             case SUB:
-                state = 6;
+                state = i6;
                 break;
             default:
                 return ERROR;
@@ -146,7 +157,7 @@ class SyntaxAnalyzer<LR0> {
 
     int I2 () {
         if (hasTokens()) {
-            state = 0;
+            state = i0;
             stack.pop();
             stack.push(E);
             return REDUCE;
@@ -157,11 +168,11 @@ class SyntaxAnalyzer<LR0> {
         switch (token) {
             case MUL:
             case DIV:
-                state = 7;
+                state = i7;
                 return I7();
             case ADD:   //??????
             case SUB:
-                state = 1;
+                state = i1;
                 input.push(stack.top());
                 stack.pop();
                 stack.pop();
@@ -177,11 +188,11 @@ class SyntaxAnalyzer<LR0> {
     }
 
     int I3 () {
-        if (hasTokens()) {
-            state = 1;
-            return REDUCE;
+        if (stackEmpty()) {
+            state = i1;
+        } else {
+            state = i9;
         }
-        state = 9;
         stack.pop();
         stack.push(T);
         return REDUCE;
@@ -192,20 +203,20 @@ class SyntaxAnalyzer<LR0> {
 
         switch (token) {
             case E:
-                state = 8;
+                state = i8;
                 break;
             case OPEN_SCOPE:
-                state = 4;
+                state = i4;
                 break;
             case T:
-                state = 2;
+                state = i2;
                 break;
             case P:
-                state = 3;
+                state = i3;
                 break;
             case NUM:
             case VAR: 
-                state = 5;
+                state = i5;
                 break;
             default:
                 printf ("error\n");
@@ -216,10 +227,10 @@ class SyntaxAnalyzer<LR0> {
     }
 
     int I5 () {
-        state = 3;
+        state = i3;
         stack.pop();
         if (stackEmpty()) {
-            state = 3;
+            state = i3;
             stack.push(P);
 
             return REDUCE;
@@ -227,10 +238,10 @@ class SyntaxAnalyzer<LR0> {
         switch (stack.top()) {
             case DIV:
             case MUL:
-                state = 10;
+                state = i10;
                 break;
             default:
-                state = 3;
+                state = i3;
                 break;
         }
         stack.push(P);
@@ -243,17 +254,17 @@ class SyntaxAnalyzer<LR0> {
 
         switch (token) {
             case T:
-                state = 9;
+                state = i9;
                 break;
             case P:
-                state = 3;
+                state = i3;
                 break;
             case OPEN_SCOPE:
-                state = 4;
+                state = i4;
                 break;
             case NUM:
             case VAR:
-                state = 5;
+                state = i5;
                 break;
             default:
                 return ERROR;
@@ -268,14 +279,14 @@ class SyntaxAnalyzer<LR0> {
 
         switch (token) {
             case P:
-                state = 10;
+                state = i10;
                 break;
             case OPEN_SCOPE:
-                state = 4;
+                state = i4;
                 break;
             case NUM:
             case VAR:
-                state = 5;
+                state = i5;
                 break;
             default:
                 return ERROR;
@@ -290,11 +301,11 @@ class SyntaxAnalyzer<LR0> {
 
         switch (token) {
             case CLOSE_SCOPE:
-                state = 11;
+                state = i11;
                 break;
             case ADD:
             case SUB:
-                state = 6;
+                state = i6;
                 break;
             default:
                 return ERROR;
@@ -305,25 +316,47 @@ class SyntaxAnalyzer<LR0> {
     }
 
     int I9 () {
+        if (hasTokens()) {
+            if (stack.top() == T) {
+                if (stack.size() > 2) {
+                    state = i1;
+                    stack.pop();
+                    stack.pop();
+                } else {
+                    state = i1;
+                }
+                return REDUCE;      //???
+            } else {
+                return ERROR;
+            }
+        }
         int token = shift ();
 
         switch (token) {
             case MUL:
             case DIV:
-                state = 7;
+                state = i7;
                 break;
             default:
                 input.push(stack.top());
                 stack.pop();
                 input.push(stack.top());
                 stack.pop();
+
+                if (stackEmpty()) {
+                    state = i2;
+                    stack.push(input.top());
+                    input.pop();
+                    return REDUCE;
+                }
+
                 if (stack.top() == ADD || stack.top() == SUB) {
-                    state = 8;
+                    state = i8;
                     input.pop();
                     stack.pop();
                     return REDUCE;
                 } else {
-                    state = 2;
+                    state = i2;
                     stack.push(input.top());
                     input.pop();
                     return SHIFT;
@@ -334,7 +367,7 @@ class SyntaxAnalyzer<LR0> {
     }
 
     int I10 () {
-        state = 3;
+        state = i3;
         stack.pop();
         stack.pop();
 
@@ -348,14 +381,14 @@ class SyntaxAnalyzer<LR0> {
 
         if (stackEmpty()) {
             stack.push(P);
-            state = 3;
+            state = i3;
             return REDUCE;
         }
         
         if (stack.top() == MUL || stack.top() == DIV) {
-            state = 10;
+            state = i10;
         } else {
-            state = 3;
+            state = i3;
         }
         stack.push(P);
 

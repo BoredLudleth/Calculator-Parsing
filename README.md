@@ -16,11 +16,12 @@ make
 
 ## Часть I. LR(0) грамматика нашего языка ##
 ```
-G   ::= E<EOF>
-E   ::= E{[+-]T}*
-T   ::= T{[*/]P}*
-P   ::= (E)|ID
-ID  ::= VAR|NUM
+E -> E + T 
+E -> T
+T -> T * F 
+T -> F
+F -> ( E ) 
+F -> VAR|NUM
 VAR ::= [xyz]
 NUM ::= [0-9]*
 ```
