@@ -325,10 +325,21 @@ class SyntaxAnalyzer<LR0> {
                 } else {
                     state = i1;
                 }
-                return REDUCE;      //???
+                return REDUCE;
             } else {
                 return ERROR;
             }
+        }
+
+        if (stack.top() == T && input.top() == CLOSE_SCOPE) {
+            stack.pop();
+            if (stack.top() == OPEN_SCOPE) {
+                state = 8;
+                stack.push(E);
+                return REDUCE;
+            }
+
+            stack.push(T);
         }
         int token = shift ();
 
